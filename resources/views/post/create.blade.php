@@ -32,15 +32,22 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                    <div class="form-group">
-                        <div id="editor" style="height: 300px;"></div>
-                        <input type="hidden" name="content" id="content">
+                    <div class="mb-3">
+                        <label class="form-label" for="inputEmail">Body:</label>
+                        <div id="quill-editor" class="mb-3" style="height: 300px;"></div>
+                        <textarea rows="3" class="mb-3 d-none" name="content" id="quill-editor-area"></textarea>
 
-                        <!-- Поле для загрузки изображений -->
-                        <input type="file" name="image" required>
-                        <div class="form-group">
+                        @error('body')
+                        <span class="text-danger">{{ $message }}</span>
+                        @endif
+                    </div>
+
+
+                    <!-- Кнопка для отправки формы -->
+                    <div class="form-group">
                             <input type="submit" class="btn btn-primary" value="Добавить">
                         </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -52,28 +59,36 @@
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
-<script>
-    var quill = new Quill('#editor', {
-        theme: 'snow',
-        modules: {
-            toolbar: [
-                ['bold', 'italic', 'underline'],
-                ['link', 'image'],
-                [{'list': 'ordered'}, {'list': 'bullet'}]
-            ]
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('quill-editor-area')) {
+            // Инициализация Quill с поддержкой изображений
+            var editor = new Quill('#quill-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'header': 1 }, { 'header': 2 }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['link', 'image'] // Добавление кнопки для вставки изображения
+                    ]
+                }
+            });
+
+            var quillEditor = document.getElementById('quill-editor-area');
+
+            // Сохранение HTML-контента в textarea
+            editor.on('text-change', function() {
+                quillEditor.value = editor.root.innerHTML;
+            });
+
+            // Загрузка данных из textarea в редактор при загрузке
+            quillEditor.addEventListener('input', function() {
+                editor.root.innerHTML = quillEditor.value;
+            });
         }
     });
-
-    document.querySelector('form').onsubmit = function () {
-        var content = document.querySelector('#content');
-        content.value = quill.root.innerHTML; // Получаем HTML-код из Quill
-    };
-
-    document.querySelector('form').addEventListener('submit', function () {
-        var editorContent = document.getElementById('editor').innerHTML; // или используйте метод вашего редактора
-        document.getElementById('content').value = editorContent;
-    });
-
 </script>
 
 <!-- /.content -->

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Post;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\PostImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,21 +12,23 @@ class DeleteController extends Controller
 {
     public function __invoke(Post $post)
     {
-        // Прежде чем удалять, эксплуатируйте имеющиеся изображения
-        $currentImages = $post->images;
+        $oldImages = PostImage::where('post_id', $post->id)->get();
 
-        // Удаляем все связанные изображения
-        foreach ($currentImages as $currentImage){
-            if(Storage::disk('public')->exists($currentImage->path)) {
-                Storage::disk('public')->delete($currentImage->path); // Удаляем файл
-            }
-            $currentImage->delete(); // Удаляем запись в базе данных
+        // Удаляем старые изображения из файловой системы и базы данных
+        foreach ($oldImages as $oldImage) {
+            // Удаляем файл изображения с диска
+            Storage::disk('public')->delete($oldImage->image_path);
+
+            // Удаляем запись из базы данных
+            $oldImage->delete();
         }
 
-        // Теперь удаляем сам пост
+        // Удаляем сам пост из базы данных
         $post->delete();
 
-        return response()->json(['message' => 'Post and related images deleted successfully']);
+        // Перенаправляем на страницу с индексом постов
+        return redirect()->route('post.index');
+
     }
 
 }

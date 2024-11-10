@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Post\PostController;
+use App\Http\Controllers\ContentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,6 +41,9 @@ Route::group(['prefix' => 'admin'], function () {
         Route::delete('/{post}', \App\Http\Controllers\Admin\Post\DeleteController::class)->name('post.delete');
     });
 });
+
+Route::post('/upload-image', [ContentController::class, 'uploadImage'])->name('upload.image');
+Route::post('/save-content', [ContentController::class, 'save'])->name('save.content');
 
 Route::resource('posts', PostController::class);
 

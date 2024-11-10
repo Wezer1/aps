@@ -18,11 +18,7 @@
             <input type="hidden" name="content" id="content">
         </div>
 
-        <div class="form-group">
-            <input type="file" name="image" required>
 
-            <img src="{{ asset('storage/' . $post->preview_path) }}" alt="Текущее изображение" style="max-width: 100px;">
-        </div>
 
         <input type="submit" class="btn btn-primary" value="Сохранить изменения">
         <a href="{{ route('post.index') }}" class="btn btn-secondary">Назад</a>
