@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\PostImage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UpdateController extends Controller
 {
@@ -15,39 +16,65 @@ class UpdateController extends Controller
     {
         $data = $request->validated();
 
-        // Проверка на наличие нового изображения
-        if (isset($data['image'])) {
-            $image = $data['image'];
-            $name = md5(Carbon::now() . '_' . $image->getClientOriginalName()) . '.' . $image->getClientOriginalExtension();
+        // Получаем HTML-контент из поля content
+        $htmlContent = $data['content'];
 
-            // Удаление старого изображения, если оно существует
-            if ($post->preview_path) {
-                Storage::disk('public')->delete($post->preview_path);
-            }
-            $post->update([
-                'preview_path' => 'images/'. $name
-                // Можно добавить другие поля, если нужно
-            ]);
+        // Используем DOMDocument для парсинга HTML
+        $dom = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($htmlContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();  // Очистить ошибки после загрузки
 
+        // Получаем существующий пост по ID
+        $post = Post::findOrFail($post->id);
 
-            // Сохранение нового изображения
-            $filePath = Storage::disk('public')->putFileAs('/images', $image, $name);
+        // Получаем все старые изображения, связанные с постом
+        $oldImages = PostImage::where('post_id', $post->id)->get();
+
+        // Удаляем старые изображения из файловой системы и базы данных
+        foreach ($oldImages as $oldImage) {
+            // Удаляем файл изображения с диска
+            Storage::disk('public')->delete($oldImage->image_path);
+
+            // Удаляем запись из базы данных
+            $oldImage->delete();
         }
-
-        // Обновление других полей поста
+        // Обновляем данные поста
         $post->update([
             'title' => $data['title'],
             'slug' => $this->generateSlug($data['title']),
-            'content' => $data['content'],
-            // Можно добавить другие поля, если нужно
+            'content' => $htmlContent, // Обновляем контент
         ]);
 
-        // Если есть новое изображение, обновляем запись в PostImage
-        if (isset($data['image'])) {
-            PostImage::updateOrCreate(
-                ['post_id' => $post->id],
-                ['image_path' => $filePath]
-            );
+        // Получаем изображения из контента
+        $images = $dom->getElementsByTagName('img');
+        foreach ($images as $image) {
+            $src = $image->getAttribute('src');
+
+            // Проверяем, является ли src изображением в формате base64
+            if (preg_match('/^data:image\/(\w+);base64,/', $src, $type)) {
+                // Определяем расширение изображения
+                $extension = strtolower($type[1]);
+                // Убираем base64 и декодируем изображение
+                $imageData = substr($src, strpos($src, ',') + 1);
+                $imageData = base64_decode($imageData);
+
+                // Генерируем уникальное имя файла
+                $fileName = 'image_' . time() . '_' . Str::random(10) . '.' . $extension;
+                $filePath = 'uploads/images/' . $fileName;
+
+                // Сохраняем изображение в файловой системе
+                Storage::disk('public')->put($filePath, $imageData);
+
+                // Заменяем base64 изображение на URL загруженного файла
+                $image->setAttribute('src', Storage::url($filePath));
+
+                // Сохраняем информацию об изображении в таблице post_images
+                PostImage::create([
+                    'post_id' => $post->id,
+                    'image_path' => $filePath,
+                ]);
+            }
         }
 
         return redirect()->route('post.index');
@@ -64,7 +91,8 @@ class UpdateController extends Controller
         return $this->transliterate($title);
     }
 
-    function transliterate($text) {
+    function transliterate($text)
+    {
         $transliterationTable = [
             'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e',
             'ё' => 'yo', 'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'y', 'к' => 'k',

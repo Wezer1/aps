@@ -25,10 +25,7 @@ class UpdateRequest extends FormRequest
     {
         return [
             'title'=>'required|string',
-            'image'=>'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'content'=>'nullable|string',
-            'image_ids_for_delete'=>'nullable|array',
-            'image_urls_for_delete'=>'nullable|array',
         ];
     }
 }

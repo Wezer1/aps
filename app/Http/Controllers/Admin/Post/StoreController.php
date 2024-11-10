@@ -8,34 +8,62 @@ use App\Models\Post;
 use App\Models\PostImage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class StoreController extends Controller
 {
     public function __invoke(StoreRequest $request)
     {
         $data = $request->validated();
-        $image = $data['image'];
-        $name = md5(Carbon::now() . '_' . $image->getClientOriginalName()) . '.' . $image->getClientOriginalExtension();
 
+        // Получаем HTML-контент из поля content
+        $htmlContent = $data['content'];
 
-        unset($data['image']);
+        // Используем DOMDocument для парсинга HTML
+        $dom = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($htmlContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();  // Очистить ошибки после загрузки
 
-        $filePath = Storage::disk('public')->putFileAs('/images', $image, $name);
+        // Создаем пост перед обработкой изображений
         $post = Post::create([
-            'title' => $data['title'], // передаем заголовок
-            'preview_path' => 'images/'. $name, // передаем путь к превью (если есть)
+            'title' => $data['title'],
+            'preview_path' => null, // Пока нет пути для превью
             'slug' => $this->generateSlug($data['title']),
-            'content' => $data['content'], // передаем содержимое
-            // Не забудьте добавить slug (с транслитерацией)
-        ]);
-        PostImage::create([
-            'post_id' => $post->id,
-            'image_path' => $filePath
+            'content' => $htmlContent, // Сохраняем исходный контент
         ]);
 
+        $images = $dom->getElementsByTagName('img');
+        foreach ($images as $image) {
+            $src = $image->getAttribute('src');
+
+            // Проверяем, является ли src изображением в формате base64
+            if (preg_match('/^data:image\/(\w+);base64,/', $src, $type)) {
+                // Определяем расширение изображения
+                $extension = strtolower($type[1]);
+                // Убираем base64 и декодируем изображение
+                $imageData = substr($src, strpos($src, ',') + 1);
+                $imageData = base64_decode($imageData);
+
+                // Генерируем уникальное имя файла
+                $fileName = 'image_' . time() . '_' . Str::random(10) . '.' . $extension;
+                $filePath = 'uploads/images/' . $fileName;
+
+                // Сохраняем изображение в файловой системе
+                Storage::disk('public')->put($filePath, $imageData);
+
+                // Заменяем base64 изображение на URL загруженного файла
+                $image->setAttribute('src', Storage::url($filePath));
+
+                // Сохраняем информацию об изображении в таблице post_images
+                PostImage::create([
+                    'post_id' => $post->id,
+                    'image_path' => $filePath,
+                ]);
+            }
+        }
 
         return redirect()->route('post.index');
-
     }
 
     private function generateSlug($title)
@@ -68,7 +96,6 @@ class StoreController extends Controller
 
         return strtr($text, $transliterationTable);
     }
-
 }
 
 
