@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Post;
 use App\Models\Post;
 use Illuminate\Routing\Controller;
 use IlluminateHttpRequest;
-class PostController extends Controller
+class PostController extends BaseController
 {
     public function store(Request $request)
     {
