@@ -67,16 +67,44 @@
                 theme: 'snow',
                 modules: {
                     toolbar: [
-                        ['bold', 'italic', 'underline'],
-                        [{ 'header': 1 }, { 'header': 2 }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'align': [] }],
-                        ['link', 'image'] // Добавление кнопки для вставки изображения
+                        [{ 'header': [1, 2, 3, false] }], // Header levels
+                        ['bold', 'italic', 'underline', 'strike'], // Basic formatting
+                        [{ 'color': [] }, { 'background': [] }], // Text color and background color
+                        [{ 'script': 'sub' }, { 'script': 'super' }], // Subscript/superscript
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }], // Lists
+                        [{ 'align': [] }], // Text alignment
+                        ['link', 'image', 'video'], // Links, images, videos
+                        ['clean'] // Remove formatting
                     ]
                 }
             });
 
             var quillEditor = document.getElementById('quill-editor-area');
+            const allowedImageFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+
+            // Переопределяем вставку изображения
+            editor.getModule('toolbar').addHandler('image', function() {
+                var input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('accept', 'image/*');
+                input.click();
+
+                input.onchange = function() {
+                    var file = input.files[0];
+
+                    // Проверка формата изображения
+                    if (file && allowedImageFormats.includes(file.type)) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            var range = editor.getSelection();
+                            editor.insertEmbed(range.index, 'image', e.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        alert('Недопустимый формат изображения. Поддерживаются только JPEG и PNG.');
+                    }
+                };
+            });
 
             // Сохранение HTML-контента в textarea
             editor.on('text-change', function() {

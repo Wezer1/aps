@@ -13,9 +13,14 @@
             <input type="text" name="title" id="title" class="form-control" value="{{ old('title', $post->title) }}" required>
         </div>
 
-        <div class="form-group">
-            <div id="editor-container"></div>
-            <input type="hidden" name="content" id="content">
+        <div class="mb-3">
+            <label class="form-label" for="inputEmail">Body:</label>
+            <div id="quill-editor" class="mb-3" style="height: 300px;"></div>
+            <textarea rows="3" class="mb-3 d-none" name="content" id="quill-editor-area"></textarea>
+
+            @error('body')
+            <span class="text-danger">{{ $message }}</span>
+            @endif
         </div>
 
 
@@ -32,18 +37,48 @@
 
     // Получаем содержимое из data-атрибута
     document.addEventListener('DOMContentLoaded', function() {
-        var quill = new Quill('#editor-container', {
+        var quill = new Quill('#quill-editor', {
             theme: 'snow',
             modules: {
                 toolbar: [
-                    ['bold', 'italic', 'underline'],
-                    ['link', 'image'],
-                    [{'list': 'ordered'}, {'list': 'bullet'}]
+                    [{ 'header': [1, 2, 3, false] }], // Header levels
+                    ['bold', 'italic', 'underline', 'strike'], // Basic formatting
+                    [{ 'color': [] }, { 'background': [] }], // Text color and background color
+                    [{ 'script': 'sub' }, { 'script': 'super' }], // Subscript/superscript
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }], // Lists
+                    [{ 'align': [] }], // Text alignment
+                    ['link', 'image', 'video'], // Links, images, videos
+                    ['clean'] // Remove formatting
                 ]
             }
         });
 
-        // Получаем содержимое из переменной PHP
+        const allowedImageFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+
+        // Переопределяем вставку изображения
+        quill.getModule('toolbar').addHandler('image', function() {
+            let input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click();
+
+            input.onchange = function() {
+                let file = input.files[0];
+
+                // Проверка формата изображения
+                if (file && allowedImageFormats.includes(file.type)) {
+                    let reader = new FileReader();
+                    reader.onload = function(e) {
+                        let range = quill.getSelection();
+                        quill.insertEmbed(range.index, 'image', e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Недопустимый формат изображения. Поддерживаются только JPEG и PNG.');
+                }
+            };
+        });
+
         var content = {!! json_encode($post->content) !!};
 
         // Проверка на наличие контента
@@ -51,23 +86,17 @@
             quill.clipboard.dangerouslyPasteHTML(content);
         }
 
-        // При отправке формы
         document.getElementById('edit-post-form').onsubmit = function(event) {
             var content = quill.root.innerHTML;
 
-            // Валидация: если контент пустой, предотвратить отправку формы
             if (!content.trim()) {
                 event.preventDefault();
                 alert("Пожалуйста, введите содержимое.");
                 return;
             }
 
-            // Записываем его в скрытое поле
-            document.getElementById('content').value = content;
+            document.getElementById('quill-editor-area').value = content;
         };
     });
-
-
-
 </script>
 @endsection
