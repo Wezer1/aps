@@ -13,7 +13,8 @@
 
                 <h6 class="card-subtitle text-muted mb-2">Описание:</h6>
                 <p class="card-text">{!! $category->description !!}</p>
-
+                <h6 class="card-subtitle text-muted mb-2">Описание:</h6>
+                <p class="card-text">{!!$category->preview_path!!}</p>
                 <h6 class="card-subtitle text-muted mb-2">Длительность:</h6>
                 <p class="card-text">{{$category->duration}} дней</p>
             </div>
