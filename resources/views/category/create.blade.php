@@ -35,13 +35,14 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="inputEmail">Описание:</label>
+                    <div class="mb-3">
+                        <label class="form-label" for="inputEmail">Body:</label>
                         <div id="quill-editor" class="mb-3" style="height: 300px;"></div>
                         <textarea rows="3" class="mb-3 d-none" name="description" id="quill-editor-area"></textarea>
-                        @error('description')
+
+                        @error('body')
                         <span class="text-danger">{{ $message }}</span>
-                        @enderror
+                        @endif
                     </div>
                     <div class="form-group">
                         <label for="price">Цена</label>
@@ -71,6 +72,10 @@
 </section>
 <!-- /.content -->
 @endsection
+
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
 @section('script')
 <script type="text/javascript">
