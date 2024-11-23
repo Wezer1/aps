@@ -40,6 +40,16 @@ Route::group(['prefix' => 'admin'], function () {
         Route::patch('/{post}', \App\Http\Controllers\Admin\Post\UpdateController::class)->name('post.update');
         Route::delete('/{post}', \App\Http\Controllers\Admin\Post\DeleteController::class)->name('post.delete');
     });
+
+    Route::group(['prefix' => 'discounts'], function () {
+        Route::get('/', \App\Http\Controllers\Admin\Discount\IndexController::class)->name('discount.index');
+        Route::get('/create', \App\Http\Controllers\Admin\Discount\CreateController::class)->name('discount.create');
+        Route::post('/', \App\Http\Controllers\Admin\Discount\StoreController::class)->name('discount.store');
+        Route::get('/{discount}/edit', \App\Http\Controllers\Admin\Discount\EditController::class)->name('discount.edit');
+        Route::get('/{discount}', \App\Http\Controllers\Admin\Discount\ShowController::class)->name('discount.show');
+        Route::patch('/{discount}', \App\Http\Controllers\Admin\Discount\UpdateController::class)->name('discount.update');
+        Route::delete('/{discount}', \App\Http\Controllers\Admin\Discount\DeleteController::class)->name('discount.delete');
+    });
 });
 
 Route::post('/upload-image', [ContentController::class, 'uploadImage'])->name('upload.image');
@@ -49,4 +59,5 @@ Route::resource('posts', PostController::class);
 
 //Route::get('/', \App\Http\Controllers\IndexController::class)->name('main.index');
 Route::get('{page}', \App\Http\Controllers\IndexController::class)->where('page', '.*');
+
 

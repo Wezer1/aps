@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Автошкола Политех')</title>
 
     <!-- Google Font: Source Sans Pro -->
@@ -33,30 +34,30 @@
         <!-- Right navbar links -->
         <ul class="navbar-nav ms-auto">
             @auth
-                <li class="nav-item dropdown">
-                    <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                        {{ Auth::user()->name }}
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{{ route('logout') }}"
-                           onclick="event.preventDefault();
+            <li class="nav-item dropdown">
+                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                    {{ Auth::user()->name }}
+                </a>
+                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{{ route('logout') }}"
+                       onclick="event.preventDefault();
                                  document.getElementById('logout-form').submit();">
-                            Выйти
-                        </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                            @csrf
-                        </form>
-                    </div>
-                </li>
+                        Выйти
+                    </a>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                        @csrf
+                    </form>
+                </div>
+            </li>
             @else
-{{--                <li class="nav-item">--}}
-{{--                    <a class="nav-link" href="{{ route('login') }}">Авторизация</a>--}}
-{{--                </li>--}}
-{{--                @if (Route::has('register'))--}}
-{{--                    <li class="nav-item">--}}
-{{--                        <a class="nav-link" href="{{ route('register') }}">Регистрация</a>--}}
-{{--                    </li>--}}
-{{--                @endif--}}
+            {{--                <li class="nav-item">--}}
+                {{--                    <a class="nav-link" href="{{ route('login') }}">Авторизация</a>--}}
+                {{--                </li>--}}
+            {{--                @if (Route::has('register'))--}}
+            {{--                    <li class="nav-item">--}}
+                {{--                        <a class="nav-link" href="{{ route('register') }}">Регистрация</a>--}}
+                {{--                    </li>--}}
+            {{--                @endif--}}
             @endauth
         </ul>
     </nav>
@@ -64,42 +65,42 @@
 
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
-{{--        @if(auth()->user()->hasRole('admin'))--}}
+        {{--        @if(auth()->user()->hasRole('admin'))--}}
         @if(1)
-            <!-- Brand Logo -->
-            <a href="{{ url('/') }}" class="brand-link text-decoration-none">
-{{--                <span class="brand-text font-weight-light h2 text-light font-weight-bold ms-3">Кубанский Политех</span>--}}
-                <img src="{{ asset('logo.png') }}" alt="" class="brand-text" style="width: 200px">
-            </a>
+        <!-- Brand Logo -->
+        <a href="{{ url('/') }}" class="brand-link text-decoration-none">
+            {{--                <span class="brand-text font-weight-light h2 text-light font-weight-bold ms-3">Кубанский Политех</span>--}}
+            <img src="{{ asset('logo.png') }}" alt="" class="brand-text" style="width: 200px">
+        </a>
 
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <!-- Sidebar Menu -->
-                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                        <li class="nav-item">
-                            <a href="{{ route('category.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-list"></i>
-                                <p>Категории</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('post.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-th"></i>
-                                <p>Посты</p>
-                            </a>
-                        </li>
-{{--                        <li class="nav-item">--}}
-{{--                            <a href="{{ route('day-ledger.index') }}" class="nav-link">--}}
-{{--                                <i class="nav-icon fas fa-balance-scale-right"></i>--}}
-{{--                                <p>Бухгалтерия</p>--}}
-{{--                            </a>--}}
-{{--                        </li>--}}
-                    </ul>
-                </nav>
-                <!-- /.sidebar-menu -->
-            </div>
-            <!-- /.sidebar -->
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar Menu -->
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                    <li class="nav-item">
+                        <a href="{{ route('category.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-list"></i>
+                            <p>Категории</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('post.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-th"></i>
+                            <p>Посты</p>
+                        </a>
+                    </li>
+                    {{--                        <li class="nav-item">--}}
+                        {{--                            <a href="{{ route('day-ledger.index') }}" class="nav-link">--}}
+                            {{--                                <i class="nav-icon fas fa-balance-scale-right"></i>--}}
+                            {{--                                <p>Бухгалтерия</p>--}}
+                            {{--                            </a>--}}
+                        {{--                        </li>--}}
+                </ul>
+            </nav>
+            <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
         @endif
     </aside>
 
@@ -107,24 +108,24 @@
     <div class="content-wrapper">
         @yield('content')
 
-{{--        @if(auth()->user()->hasRole('admin'))--}}
-{{--            @yield('content')--}}
-{{--        @else--}}
-{{--            <div class="card text-center">--}}
-{{--                <div class="card-header">--}}
-{{--                    Ошибка доступа--}}
-{{--                </div>--}}
-{{--                <div class="card-body">--}}
-{{--                    <h5 class="card-title">Нет прав доступа</h5>--}}
-{{--                    <p class="card-text">У вас нет прав для доступа к этому разделу.</p>--}}
-{{--                    <a href="{{ route('logout') }}"--}}
-{{--                       class="btn btn-danger"--}}
-{{--                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">--}}
-{{--                        Выйти--}}
-{{--                    </a>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        @endif--}}
+        {{--        @if(auth()->user()->hasRole('admin'))--}}
+        {{--            @yield('content')--}}
+        {{--        @else--}}
+        {{--            <div class="card text-center">--}}
+            {{--                <div class="card-header">--}}
+                {{--                    Ошибка доступа--}}
+                {{--                </div>--}}
+            {{--                <div class="card-body">--}}
+                {{--                    <h5 class="card-title">Нет прав доступа</h5>--}}
+                {{--                    <p class="card-text">У вас нет прав для доступа к этому разделу.</p>--}}
+                {{--                    <a href="{{ route('logout') }}"--}}
+                                           {{--                       class="btn btn-danger"--}}
+                                           {{--                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">--}}
+                    {{--                        Выйти--}}
+                    {{--                    </a>--}}
+                {{--                </div>--}}
+            {{--            </div>--}}
+        {{--        @endif--}}
     </div>
     <!-- /.content-wrapper -->
     <footer class="main-footer">
